@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fokus26 — Dr. Indra Gaurav</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 700px;
+      height: 90vh;
+      max-height: 750px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e0ddd6;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    #header {
+      padding: 14px 18px;
+      border-bottom: 1px solid #e0ddd6;
+      background: #fafaf8;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    #avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #dbeafe; color: #1d4ed8;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 14px; flex-shrink: 0;
+    }
+
+    #header-text p { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+    #header-text span { font-size: 12px; color: #888; }
+    #badge {
+      margin-left: auto; font-size: 11px; padding: 3px 10px;
+      border-radius: 20px; background: #dcfce7; color: #166534;
+      display: none;
+    }
+
+    #messages {
+      flex: 1; overflow-y: auto; padding: 18px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .msg { display: flex; gap: 10px; max-width: 88%; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg.assistant { align-self: flex-start; }
+
+    .msg-av {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; margin-top: 2px;
+    }
+    .msg.assistant .msg-av { background: #dbeafe; color: #1d4ed8; }
+    .msg.user .msg-av { background: #f0f0ec; color: #555; border: 1px solid #ddd; }
+
+    .bubble {
+      padding: 10px 14px; border-radius: 14px;
+      font-size: 14px; line-height: 1.65;
+    }
+    .msg.assistant .bubble {
+      background: #f5f5f0; border: 1px solid #e0ddd6;
+      color: #1a1a1a; border-top-left-radius: 4px;
+    }
+    .msg.user .bubble {
+      background: #1d4ed8; color: #fff;
+      border-top-right-radius: 4px;
+    }
+    .bubble p { margin-bottom: 7px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble strong { font-weight: 600; }
+
+    .typing { display: flex; gap: 5px; align-items: center; padding: 12px 14px; }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #aaa;
+      animation: bounce 1.2s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%,60%,100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    #input-area {
+      padding: 12px 16px;
+      border-top: 1px solid #e0ddd6;
+      display: flex; gap: 8px; align-items: flex-end;
+      background: #fff; flex-shrink: 0;
+    }
+
+    #user-input {
+      flex: 1; resize: none; border: 1px solid #ddd; border-radius: 10px;
+      padding: 9px 13px; font-size: 14px; line-height: 1.5;
+      font-family: inherit; min-height: 38px; max-height: 120px;
+      outline: none; transition: border-color 0.15s;
+    }
+    #user-input:focus { border-color: #1d4ed8; }
+
+    #send-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: #1d4ed8; color: #fff; border: none;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; font-size: 18px;
+      transition: background 0.15s;
+    }
+    #send-btn:hover { background: #1e40af; }
+    #send-btn:disabled { background: #bbb; cursor: not-allowed; }
+
+    #footer {
+      padding: 8px 16px; text-align: center;
+      font-size: 11px; color: #aaa; flex-shrink: 0;
+    }
+    #reset-link {
+      color: #aaa; cursor: pointer; text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="header">
+      <div id="avatar">IG</div>
+      <div id="header-text">
+        <p>Dr. Indra Gaurav</p>
+        <span>CTO · Fokus26 · Kronberg Sitzsysteme GmbH</span>
+      </div>
+      <span id="badge">● online</span>
+    </div>
+
+    <div id="messages"></div>
+
+    <div id="input-area">
+      <textarea id="user-input" placeholder="Ihre Frage an Dr. Gaurav..." rows="1"></textarea>
+      <button id="send-btn" aria-label="Senden">↑</button>
+    </div>
+
+    <div id="footer">
+      Fokus26 Team-Simulation &nbsp;·&nbsp;
+      <span id="reset-link">Neu starten</span>
+    </div>
+  </div>
+
+  <script>
+    let messages = [];
+    let isLoading = false;
+    const messagesDiv = document.getElementById('messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const badge = document.getElementById('badge');
+
+    function formatText(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .split('\n').map(l => l.trim() ? `<p>${l}</p>` : '').join('');
+    }
+
+    function addMessage(role, content) {
+      const msg = document.createElement('div');
+      msg.className = `msg ${role}`;
+      const av = document.createElement('div');
+      av.className = 'msg-av';
+      av.textContent = role === 'assistant' ? 'IG' : 'Sie';
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = formatText(content);
+      msg.appendChild(av);
+      msg.appendChild(bubble);
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function showTyping() {
+      const msg = document.createElement('div');
+      msg.className = 'msg assistant';
+      msg.id = 'typing-msg';
+      msg.innerHTML = '<div class="msg-av">IG</div><div class="bubble typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function hideTyping() {
+      const t = document.getElementById('typing-msg');
+      if (t) t.remove();
+    }
+
+    async function callAPI(msgs) {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: msgs })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return data.reply;
+    }
+
+    async function sendMessage(text) {
+      if (isLoading || !text.trim()) return;
+      isLoading = true;
+      sendBtn.disabled = true;
+      messages.push({ role: 'user', content: text });
+      addMessage('user', text);
+      showTyping();
+      try {
+        const reply = await callAPI(messages);
+        hideTyping();
+        messages.push({ role: 'assistant', content: reply });
+        addMessage('assistant', reply);
+      } catch (e) {
+        hideTyping();
+        addMessage('assistant', 'Fehler: ' + e.message);
+      }
+      isLoading = false;
+      sendBtn.disabled = false;
+    }
+
+    async function init() {
+      badge.style.display = 'block';
+      showTyping();
+      try {
+        const reply = await callAPI([{ role: 'user', content: 'Starte die Simulation.' }]);
+        hideTyping();
+        messages.push({ role: 'user', content: 'Starte die Simulation.' });
+        messages.push({ role: 'assistant', content: reply });
+        addMessage('assistant', reply);
+      } catch (e) {
+        hideTyping();
+        addMessage('assistant', 'Verbindungsfehler beim Laden. Bitte Seite neu laden.');
+      }
+    }
+
+    sendBtn.addEventListener('click', () => {
+      const text = userInput.value.trim();
+      if (text) { userInput.value = ''; userInput.style.height = '38px'; sendMessage(text); }
+    });
+
+    userInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = userInput.value.trim();
+        if (text) { userInput.value = ''; userInput.style.height = '38px'; sendMessage(text); }
+      }
+    });
+
+    userInput.addEventListener('input', () => {
+      userInput.style.height = '38px';
+      userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+    });
+
+    document.getElementById('reset-link').addEventListener('click', () => {
+      messages = [];
+      messagesDiv.innerHTML = '';
+      init();
+    });
+
+    init();
+  </script>
+</body>
+</html>
